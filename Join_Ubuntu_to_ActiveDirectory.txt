@@ -1,0 +1,87 @@
+#Join Ubuntu/Debian to Active Directory
+
+sudo apt -y update
+
+#change Hostname
+
+sudo hostnamectl set-hostname HOSTNAME
+
+#Check hostnamectl
+
+#You can set DNS with 2 ways set DNS
+
+sudo cp /etc/resolv.conf /etc/resolve.conf.bk
+
+#1
+echo nameserver IP-DNS | sudo tee /etc/resolv.conf
+
+#2
+sudo apt install resolvconf
+
+cd /etc/resolvconf/resolv.conf.d/
+
+sudo vim head  ==> Enter IP-DNS
+
+sudo resolvconf    --enable-updates
+
+sudo resolvconf -u
+
+sudo systemctl restart resolvconf.service
+
+#Install tools
+
+sudo apt install realmd libnss-sss libpam-sss sssd sssd-tools adcli samba-common-bin oddjob oddjob-mkhomedir packagekit
+
+#Discover Active Directory on Ubuntu/Debian
+
+sudo realm discover YOUR_DOMAIN
+
+#Join Ubuntu/Debian to ActiveDirectory
+
+realm join --help
+
+sudo realm join -U administrator YOUR_DOMAIN
+
+realm list
+
+#On Ubuntu/Debian,you need to enable feature for created automatically user’s home directory
+
+sudo bash -c "cat > /usr/share/pam-configs/mkhomedir" <<EOF
+Name: activate mkhomedir
+Default: yes
+Priority: 900
+Session-Type: Additional
+Session:
+        required                        pam_mkhomedir.so umask=0022 skel=/etc/skel
+EOF
+
+sudo pam-auth-update
+
+#In PAM configuration select activate mkhomedir
+
+sudo systemctl restart sssd
+
+systemctl status sssd
+
+#Check a User
+
+id USER
+
+#Control Access–Limit to user/group
+
+sudo realm permit USER@DOMAIN
+
+sudo ream permit -g GROUP
+
+sudo realm permit --all
+
+sudo realm  deny --all
+
+#Configure Sudo Access
+
+sudo vim /etc/sudoers.d/admins  ===> USER@DOMAIN        ALL=(ALL)       ALL 
+
+
+
+
+
