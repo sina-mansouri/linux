@@ -1,0 +1,118 @@
+#Installation and configuration of MariaDB, Apache and Phpmyadmin
+
+#Install MariaDB
+
+sudo apt update
+
+sudo apt install mariadb-server mariadb-client -y
+
+mariadb --version
+
+sudo systemctl status mariadb
+
+sudo systemctl enable mariadb
+
+
+#Configuration MariaDB
+
+sudo mysql_secure_installation
+
+#Then press "Y" for subsequent prompts to configure the database engine according to best security practices.
+
+
+#Configure a password-authenticated administrative user
+
+sudo mariadb -u root -p
+
+CREATE USER 'phpmyadmin'@'localhost' IDENTIFIED BY 'YOUR_SECRET_PASSWORD';
+
+
+#The wildcard notation *.* implies that the user has permission to perform any task in any database on the database server.
+
+GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost';
+
+
+FLUSH PRIVILEGES;
+
+
+#Create Database 
+
+CREATE DATABASE TEST_DB DEFAULT CHARACTER SET utf8mb4 ;
+
+#Create Table 
+CREATE TABLE TEST_TB ( 
+NAME  VARCHAR(50),
+FAMILY  VARCHAR(50),
+PLZ  INTEGER(10)    );
+
+
+
+
+#Install Apache
+
+sudo apt install apache2 -y
+
+#Check
+http://<your server's IP>
+
+sudo a2dissite 000-default.conf
+
+sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/YOUR_DOMAIN.conf
+
+sudo mkdir -p /var/www/html/YOUR_DOMAIN/public
+
+sudo chown -R www-data:www-data /var/www/html/YOUR_DOMAIN/public
+
+sudo chmod -R 755 /var/www/html/YOUR_DOMAIN/public
+
+sudo a2ensite YOUR_DOMAIN
+
+sudo systemctl reload apache2
+
+
+#Install PHP
+
+sudo apt install php libapache2-mod-php php-mysql -y
+
+php -v
+
+sudo vim /var/www/html/YOUR_DOMAIN/public/test.php ==>
+         <?php
+         phpinfo();
+
+#Check
+http://<your server's IP>/test.php
+
+
+#Install PhpMyAdmin
+
+sudo apt install phpmyadmin php-mbstring php-zip php-gd php-json php-curl
+
+sudo phpenmod mbstring
+
+sudo systemctl restart apache2
+
+
+
+#Create User
+
+CREATE USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'PASSWORD';
+
+#The wildcard notation *.* implies that the user has permission to perform any task in any database on the database server
+
+GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;
+
+
+
+#Enter the following address in your browser
+
+your_Domain_or_IP/phpmyadmin
+
+#Enter your username and password
+
+
+
+
+
+
+
